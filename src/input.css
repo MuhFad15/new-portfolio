@@ -1,0 +1,515 @@
+/* ==================================================================
+   src/input.css  |  SATU-SATUNYA file CSS yang kamu edit (Tailwind CLI v4)
+   ==================================================================
+   Bagian 1  Tailwind: tema (warna, font, animasi), mode gelap, aturan dasar
+   Bagian 2  CSS buatan sendiri: animasi popup gacha (rate 1-5) + kartu holografik
+   Hasil build: dist/output.css (jangan diedit tangan, dibuat ulang oleh  npm run build )
+   ================================================================== */
+@import "tailwindcss";
+
+/* Tailwind otomatis memindai file di folder ini. Dua baris ini memastikan HTML dan JS pasti ikut dipindai
+   (class Tailwind yang ditulis di dalam script.js / projects.js juga ikut dibuat). */
+@source "../index.html";
+@source "../katalog.html";
+@source "../script.js";
+@source "../projects.js";
+
+/* Mode gelap lewat class "dark" di <html> (dipasang script.js dan skrip kecil di <head>) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------- BAGIAN 1: TEMA ---------- */
+@theme {
+  --font-display: "Bricolage Grotesque", system-ui, sans-serif;
+  --font-sans: Figtree, system-ui, sans-serif;
+  --font-mont: Montserrat, system-ui, sans-serif;
+
+  --color-paper: #F4F9F7;
+  --color-night: #07161A;
+  --color-panel: #0D2329;
+  --color-mist: #CFE0DE;
+  --color-edge: #1C3A40;
+  --color-pine: #0E6B70;
+  --color-aqua: #3EBEB4;
+  --color-ink: #0B262C;
+  --color-frost: #E8F3F1;
+  --color-sage: #527074;
+  --color-fog: #94B1B1;
+  --color-gold: #C99A2E;
+  --color-sun: #E2B74A;
+
+  --animate-draw: draw .9s 2.3s cubic-bezier(.2, .7, .2, 1) both;
+  --animate-f1: letter .5s .2s cubic-bezier(.2, .7, .2, 1) both;
+  --animate-f2: letter .5s .6s cubic-bezier(.2, .7, .2, 1) both;
+  --animate-f3: letter .5s 1s cubic-bezier(.2, .7, .2, 1) both;
+  --animate-veil: veil .5s 1.9s ease forwards;
+
+  @keyframes draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  @keyframes letter { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  @keyframes veil { to { opacity: 0; visibility: hidden; } }
+}
+
+/* Tailwind v4 mengubah dua kebiasaan lama. Dua aturan ini mengembalikannya supaya tampilan sama persis seperti versi CDN */
+@layer base {
+  *, ::after, ::before, ::backdrop, ::file-selector-button { border-color: var(--color-gray-200, currentColor); }
+  button:not(:disabled), [role="button"]:not(:disabled) { cursor: pointer; }
+}
+
+/* ---------- BAGIAN 2: CSS BUATAN SENDIRI (dulu style.css) ---------- */
+/* PENGATURAN POPUP GACHA
+   RATE ditulis per project di projects.js (rate: 1 sampai 5). Tampilan tiap rate ada di "TABEL RATE" di bawah:
+     --dur    lama animasi (detik) | --turns jumlah putaran (bulat, minimal 1) | --glow warna cahaya R,G,B
+     --flash  kilatan kartu (0-1)  | --ff kilatan layar penuh (0-1, rate 4-5) | --qa getaran layar (0 = diam, rate 4-5)
+   Jumlah percikan tiap rate: script.js, tabel RATES.
+   Setelah animasi, kartu ikut gyroscope (HP) / kursor (laptop) / geser jari. "Reduce motion" = tanpa animasi dan gerak.
+   Kartu rate 5 interaktif: ketuk kartu = gambar keluar dari kartu + ganti tema (script.js). */
+
+/* ---------- intro FHY: hanya tampil sekali per sesi, tidak diulang saat pindah halaman ---------- */
+.no-veil [data-veil] { display: none; }
+.no-veil .animate-draw { animation-delay: 0s; }
+
+/* ---------- popup ---------- */
+#dlg { overflow: visible; max-height: none; max-width: none; }   /* penting: mencegah scrollbar di samping kartu */
+#dlg[open] { animation: dlg-in .25s ease-out; }
+#dlg::backdrop { animation: dlg-in .25s ease-out; }
+@keyframes dlg-in { from { opacity: 0; } to { opacity: 1; } }
+
+.gacha-wrap { width: 100%; }
+.gacha-fit { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; }
+.gacha-stage { width: 100%; touch-action: none; }
+
+/* ==================================================================
+   TABEL RATE  (ubah angka di sini untuk menyetel tiap tingkat)
+   ================================================================== */
+.gacha-wrap                  { --glow: 96, 165, 250; --dur: 1.9s; --turns: 3; --flash: .8;  --ff: 0;  --qa: 0; }
+.gacha-wrap[data-rate="1"]   { --glow: 148, 177, 177; --dur: .9s;  --turns: 1; --flash: .25; }
+.gacha-wrap[data-rate="2"]   { --glow: 62, 190, 180;  --dur: 1.4s; --turns: 2; --flash: .5; }
+.gacha-wrap[data-rate="3"]   { --glow: 96, 165, 250;  --dur: 1.9s; --turns: 3; --flash: .8; }
+.gacha-wrap[data-rate="4"]   { --glow: 226, 183, 74;  --dur: 2.4s; --turns: 4; --flash: .9; --ff: .35; --qa: .5; }
+.gacha-wrap[data-rate="5"]   { --glow: 255, 95, 160;  --dur: 3.6s; --turns: 6; --flash: 1;  --ff: .55; --qa: .7; }
+
+.gacha-card {
+  perspective: 1100px;
+  animation: gacha-appear .5s ease-out both;
+}
+/* lapisan gerak gyroscope / kursor (diatur script.js). Sengaja terpisah dari .gacha-inner yang dipakai animasi putar. */
+.gacha-tilt { transform-style: preserve-3d; will-change: transform; }
+.gacha-inner {
+  position: relative;
+  transform-style: preserve-3d;
+  animation: gacha-spin var(--dur) cubic-bezier(.12, .72, .2, 1) both;
+}
+.gacha-front,
+.gacha-back {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 1.5rem;
+}
+.gacha-front { position: relative; }
+/* selama berputar, isi kartu tidak bisa diklik (supaya tidak salah pencet) */
+.gacha-wrap:not(.gacha-done) .gacha-front { pointer-events: none; }
+
+/* sisi belakang kartu (terlihat saat mulai berputar): warna bingkainya = warna rate */
+.gacha-back {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(180deg);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 4px solid rgb(var(--glow));
+  background:
+    radial-gradient(circle at 50% 50%, rgba(var(--glow), .28), transparent 62%),
+    repeating-linear-gradient(45deg, rgba(var(--glow), .1) 0 10px, transparent 10px 20px),
+    #07161A;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, .5), 0 0 24px rgba(var(--glow), .35);
+}
+/* rate 5: sisi belakang berbingkai pelangi yang berputar */
+.gacha-wrap[data-rate="5"] .gacha-back {
+  border-color: transparent;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 95, 160, .3), transparent 62%) padding-box,
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, .07) 0 10px, transparent 10px 20px) padding-box,
+    linear-gradient(#07161A, #07161A) padding-box,
+    linear-gradient(115deg, #ff5f6d, #ffc371, #f9f871, #3ebeb4, #6a7bff, #c85bff, #ff5f6d) border-box;
+  background-size: auto, auto, auto, 300% 300%;
+  background-origin: border-box;
+  animation: holo-pan 2s linear infinite;
+}
+
+/* cahaya di belakang kartu */
+.gacha-aura {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  --s: min(30rem, 100vw);
+  width: var(--s);
+  height: var(--s);
+  margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(var(--glow), .7), rgba(var(--glow), 0) 66%);
+  opacity: .35;
+  pointer-events: none;
+  animation: gacha-aura var(--dur) ease-out both;
+}
+.gacha-wrap[data-rate="5"] .gacha-aura { animation: gacha-aura var(--dur) ease-out both, gacha-hue 5s linear infinite; }
+
+/* kilatan putih saat kartu berhenti */
+.gacha-flash {
+  position: absolute;
+  inset: 0;
+  border-radius: 1.5rem;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+  animation: gacha-flash var(--dur) linear both;
+}
+
+/* percikan saat reveal (jumlahnya dari script.js, tabel RATES) */
+.gacha-spark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: .2rem;
+  height: .2rem;
+  margin: -.1rem;
+  border-radius: 9999px;
+  background: var(--c, rgb(var(--glow)));
+  box-shadow: 0 0 4px 0 var(--c, rgba(var(--glow), .5));
+  opacity: 0;
+  pointer-events: none;
+  animation: gacha-spark .8s calc(var(--dur) * .88) ease-out forwards;
+}
+
+/* energi berkumpul ke kartu sebelum terbuka (rate 4 dan 5) */
+.gacha-charge i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: .18rem;
+  height: .18rem;
+  margin: -.09rem;
+  border-radius: 9999px;
+  background: hsl(var(--h, 40) 100% 70%);
+  box-shadow: 0 0 4px 0 hsl(var(--h, 40) 100% 62% / .5);
+  opacity: 0;
+  pointer-events: none;
+  animation: gacha-charge calc(var(--dur) * .55) calc(var(--k, 0) * 1s) ease-in both;
+}
+
+/* bintang rate + nama rate di bawah kartu */
+.gacha-rank { animation: gacha-rise .5s calc(var(--dur) - .3s) ease-out both; }
+.gacha-stars i {
+  display: inline-block;
+  margin: 0 .1rem;
+  font-style: normal;
+  font-size: 1.2rem;
+  line-height: 1;
+  color: rgba(255, 255, 255, .25);
+}
+.gacha-stars i.on {
+  color: #E2B74A;
+  text-shadow: 0 0 10px rgba(var(--glow), .95);
+  animation: gacha-star .45s calc(var(--dur) * .9 + var(--i) * .14s) cubic-bezier(.3, 1.6, .5, 1) both;
+}
+.gacha-wrap[data-rate="5"] .gacha-stars i { font-size: 1.5rem; }
+.gacha-wrap[data-rate="5"] .gacha-stars i.on { color: #ffd54a; }
+.gacha-wrap[data-rate="5"] .gacha-rname {
+  font-size: 1.05rem;
+  letter-spacing: .38em;
+  background: linear-gradient(90deg, #ff5f6d, #ffc371, #f9f871, #3ebeb4, #6a7bff, #c85bff, #ff5f6d);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: holo-pan 3s linear infinite;
+}
+.gacha-hint { animation: gacha-rise .5s calc(var(--dur) + .2s) ease-out both; }
+
+/* tombol Tutup muncul setelah kartu terbuka */
+.gacha-close { animation: gacha-rise .5s calc(var(--dur) - .2s) ease-out both; }
+
+/* ---------- lapisan efek besar di belakang kartu (rate 4 dan 5), dikunci ke layar ---------- */
+.gacha-fx { position: fixed; inset: 0; overflow: hidden; pointer-events: none; }
+.gacha-fx > i, .fx-floats { position: absolute; display: block; }
+
+.fx-ring {
+  left: var(--cx, 50%);
+  top: var(--cy, 50%);
+  width: 10rem;
+  height: 10rem;
+  margin: -5rem 0 0 -5rem;
+  border-radius: 9999px;
+  border: 3px solid rgba(255, 255, 255, .9);
+  box-shadow: 0 0 24px rgba(var(--glow), .9), inset 0 0 24px rgba(var(--glow), .7);
+  opacity: 0;
+  animation: fx-ring 1s calc(var(--dur) * .87 + var(--rd, 0s)) cubic-bezier(.1, .7, .3, 1) both;
+}
+.fx-flash {
+  inset: 0;
+  background: radial-gradient(circle at var(--cx, 50%) var(--cy, 50%), #fff 0, rgba(255, 210, 240, .9) 35%, rgba(255, 255, 255, 0) 75%);
+  opacity: 0;
+  animation: fx-flash 1.2s calc(var(--dur) * .855) ease-out both;
+}
+.fx-beam {
+  left: var(--cx, 50%);
+  top: 0;
+  bottom: 0;
+  width: 4rem;
+  margin-left: -2rem;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .55) 50%, transparent);
+  opacity: 0;
+  animation: fx-beam 1.1s calc(var(--dur) * .86) ease-out both;
+}
+.fx-rays {
+  --s: max(170vw, 170vh);
+  left: var(--cx, 50%);
+  top: var(--cy, 50%);
+  width: var(--s);
+  height: var(--s);
+  margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
+  background: repeating-conic-gradient(from 0deg,
+    rgba(255, 95, 160, .13) 0 1.5deg, transparent 1.5deg 12deg,
+    rgba(62, 190, 180, .13) 12deg 13.5deg, transparent 13.5deg 24deg,
+    rgba(249, 248, 113, .14) 24deg 25.5deg, transparent 25.5deg 36deg);
+  -webkit-mask: radial-gradient(circle, #000 0, transparent 42%);
+  mask: radial-gradient(circle, #000 0, transparent 42%);
+  opacity: 0;
+  animation: fx-fade 1s calc(var(--dur) * .86) ease-out both, fx-spin 22s linear infinite;
+}
+.fx-floats { inset: 0; opacity: 0; animation: fx-fade 1s calc(var(--dur) * .9) ease-out both; }
+.fx-float {
+  position: absolute;
+  bottom: -8%;
+  left: var(--x);
+  font-style: normal;
+  font-size: var(--sz, 1rem);
+  line-height: 1;
+  color: hsl(var(--h) 100% 72%);
+  text-shadow: 0 0 4px hsl(var(--h) 100% 62%);
+  opacity: 0;
+  animation: fx-float var(--ft, 5s) linear var(--t, 0s) infinite;
+}
+
+/* ---------- gerak stage: bergetar saat energi terkumpul, lalu menghentak saat kartu terbuka ---------- */
+.gacha-wrap[data-rate="4"] .gacha-stage { animation: gacha-quake .5s calc(var(--dur) * .86) ease-out forwards; }
+.gacha-wrap[data-rate="5"] .gacha-stage { animation: gacha-jitter .07s linear infinite, gacha-quake .6s calc(var(--dur) * .86) ease-out forwards; }
+/* rate 5 setelah terbuka: kartu melayang pelan */
+.gacha-done[data-rate="5"] .gacha-stage { animation: gacha-bob 3.6s ease-in-out infinite; }
+
+/* ==================================================================
+   KARTU HOLOGRAFIK  (card di popup untuk rate 5, dibuat oleh card() di script.js)
+   ================================================================== */
+.holo-frame {
+  position: relative;
+  isolation: isolate;
+  padding: 3px;
+  border-radius: 1.5rem;
+  color: #E8F3F1;
+  background: var(--holo, linear-gradient(115deg, #ff5f6d, #ffc371, #f9f871, #3ebeb4, #6a7bff, #c85bff, #ff5f6d));
+  background-size: 300% 300%;
+  animation: holo-pan 4s linear infinite;
+  box-shadow: 0 0 26px 3px var(--hglow, rgba(255, 120, 200, .35)), 0 25px 50px -12px rgba(0, 0, 0, .6);
+}
+/* GAMBAR KELUAR DARI KARTU (rate 5, ketuk kartu). data-mode: 0 normal, 1 melompat keluar, 2 keluar ke samping.
+   Posisi gambar ikut kemiringan (--tiltx --tilty dari script.js), jadi terasa melayang di depan kartu. */
+.holo-slot {
+  position: relative;
+  border-radius: 1rem;
+  background: repeating-linear-gradient(45deg, rgba(255, 255, 255, .05) 0 8px, transparent 8px 16px), rgba(255, 255, 255, .03);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1);
+}
+.holo-img {
+  z-index: 2;
+  transition: transform .65s cubic-bezier(.3, 1.35, .5, 1), box-shadow .65s ease;
+  will-change: transform;
+}
+.holo-frame[data-mode="1"] .holo-img {
+  transform: translate(calc(var(--tiltx, 0) * -12px), calc(-3% + var(--tilty, 0) * -12px)) scale(1.07) rotate(-3deg);
+  box-shadow: 0 34px 40px -12px rgba(0, 0, 0, .7), 0 0 26px var(--hglow, rgba(255, 120, 200, .35));
+}
+.holo-frame[data-mode="2"] .holo-img {
+  transform: translate(calc(var(--ox, 30%) + var(--tiltx, 0) * -16px), calc(var(--tilty, 0) * -12px)) scale(.8) rotate(8deg);
+  box-shadow: 0 30px 38px -12px rgba(0, 0, 0, .7), 0 0 26px var(--hglow, rgba(255, 120, 200, .35));
+}
+
+/* TEMA KARTU rate 5: diganti dengan mengetuk / klik kartu (script.js menaikkan data-skin 0,1,2,3) */
+.holo-frame[data-skin="1"] { --holo: linear-gradient(115deg, #8a6a1c, #ffe08a, #fff6d0, #e2b74a, #8a6a1c, #ffe08a, #8a6a1c); --hglow: rgba(226, 183, 74, .4); }
+.holo-frame[data-skin="2"] { --holo: linear-gradient(115deg, #0e6b70, #3ebeb4, #b8fff4, #3ebeb4, #0e6b70, #3ebeb4, #0e6b70); --hglow: rgba(62, 190, 180, .4); }
+.holo-frame[data-skin="3"] { --holo: linear-gradient(115deg, #6a7bff, #c85bff, #ff5f9d, #c85bff, #6a7bff, #c85bff, #6a7bff); --hglow: rgba(200, 91, 255, .4); }
+.holo-frame { cursor: pointer; }
+.holo-frame.holo-pop { animation: holo-pan 4s linear infinite, holo-pop .45s cubic-bezier(.3, 1.5, .5, 1); }
+.holo-frame > article {
+  border-color: transparent !important;
+  border-radius: calc(1.5rem - 3px) !important;
+  background: linear-gradient(160deg, #0D2329, #07161A) !important;
+}
+.holo-frame article p { color: #94B1B1 !important; }
+.holo-frame article h3 { color: #E8F3F1; }
+
+/* lapisan kilau yang mengikuti kemiringan: --mx --my --g diisi script.js */
+.gacha-glare, .holo-foil, .holo-sparkle, .holo-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.gacha-glare {
+  opacity: var(--g, 0);
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, .22), rgba(255, 255, 255, 0) 55%);
+}
+.holo-foil {
+  mix-blend-mode: color-dodge;
+  opacity: calc(.18 + var(--g, 0) * .3);
+  background: linear-gradient(115deg, transparent 15%, rgba(255, 0, 150, .55) 30%, rgba(0, 255, 220, .5) 45%, rgba(255, 240, 0, .5) 60%, rgba(120, 80, 255, .5) 72%, transparent 85%);
+  background-size: 260% 260%;
+  background-position: var(--mx, 50%) var(--my, 50%);
+}
+.holo-sparkle {
+  mix-blend-mode: screen;
+  opacity: .3;
+  background-image:
+    radial-gradient(circle at 20% 30%, #fff 0 1px, transparent 2px),
+    radial-gradient(circle at 70% 60%, #fff 0 1px, transparent 2px),
+    radial-gradient(circle at 45% 85%, #fff 0 1px, transparent 2px);
+  background-size: 38px 38px, 53px 53px, 29px 29px;
+  background-position: var(--mx, 50%) var(--my, 50%), calc(100% - var(--mx, 50%)) var(--my, 50%), var(--mx, 50%) calc(100% - var(--my, 50%));
+  animation: holo-twinkle 2.4s ease-in-out infinite;
+}
+.holo-sheen {
+  overflow: hidden;
+  background: linear-gradient(105deg, transparent 42%, rgba(255, 255, 255, .5) 50%, transparent 58%);
+  background-size: 260% 100%;
+  background-position: 130% 0;
+  mix-blend-mode: overlay;
+  animation: holo-sheen 3.4s ease-in-out infinite;
+}
+html[data-fx="lite"] .holo-sparkle,
+html[data-fx="lite"] .fx-floats { display: none; }
+html[data-fx="lite"] .holo-foil { mix-blend-mode: normal; opacity: .22; }
+
+/* ---------- keyframes ---------- */
+@keyframes gacha-appear {
+  from { opacity: 0; transform: translateY(40px) scale(.55); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes gacha-spin {
+  from { transform: rotateY(180deg); }
+  to   { transform: rotateY(calc(var(--turns) * 360deg)); }
+}
+@keyframes gacha-aura {
+  0%   { opacity: 0;   transform: scale(.6); }
+  60%  { opacity: .55; transform: scale(1); }
+  88%  { opacity: 1;   transform: scale(1.12); }
+  100% { opacity: .45; transform: scale(1); }
+}
+@keyframes gacha-flash {
+  0%, 86% { opacity: 0; }
+  90%     { opacity: var(--flash, .9); }
+  100%    { opacity: 0; }
+}
+@keyframes gacha-spark {
+  from { opacity: .65; transform: rotate(var(--a)) translateX(var(--d0, 5rem)) scale(1); }
+  to   { opacity: 0; transform: rotate(var(--a)) translateX(var(--d1, 11rem)) scale(.2); }
+}
+@keyframes gacha-charge {
+  0%   { opacity: 0; transform: rotate(var(--a)) translateX(var(--r, 14rem)) scale(.4); }
+  25%  { opacity: .6; }
+  100% { opacity: 0; transform: rotate(var(--a)) translateX(.5rem) scale(1.2); }
+}
+@keyframes gacha-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes gacha-star {
+  from { opacity: 0; transform: scale(0) rotate(-120deg); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes gacha-jitter {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(1.5px, -1px); }
+  50%  { transform: translate(-1.5px, 1px); }
+  75%  { transform: translate(1px, 1.5px); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes gacha-quake {
+  0%   { transform: translate(0, 0); }
+  15%  { transform: translate(calc(var(--qa) * -9px), calc(var(--qa) * 5px)) rotate(calc(var(--qa) * -.8deg)); }
+  30%  { transform: translate(calc(var(--qa) * 8px), calc(var(--qa) * -6px)) rotate(calc(var(--qa) * .7deg)); }
+  45%  { transform: translate(calc(var(--qa) * -6px), calc(var(--qa) * 4px)); }
+  60%  { transform: translate(calc(var(--qa) * 4px), calc(var(--qa) * -3px)); }
+  80%  { transform: translate(calc(var(--qa) * -2px), calc(var(--qa) * 1px)); }
+  100% { transform: none; }
+}
+@keyframes gacha-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-7px); }
+}
+@keyframes gacha-hue { to { filter: hue-rotate(360deg); } }
+@keyframes fx-ring {
+  0%   { opacity: 1; transform: scale(.2); }
+  100% { opacity: 0; transform: scale(var(--rs, 4)); }
+}
+@keyframes fx-flash {
+  0%   { opacity: 0; }
+  8%   { opacity: var(--ff, 1); }
+  100% { opacity: 0; }
+}
+@keyframes fx-beam {
+  0%   { opacity: 0; transform: scaleX(0); }
+  18%  { opacity: 1; transform: scaleX(1); }
+  100% { opacity: 0; transform: scaleX(.15); }
+}
+@keyframes fx-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fx-spin { to { transform: rotate(360deg); } }
+@keyframes fx-float {
+  0%   { opacity: 0; transform: translateY(0) rotate(0) scale(.6); }
+  15%  { opacity: .55; }
+  85%  { opacity: .45; }
+  100% { opacity: 0; transform: translateY(-110vh) rotate(180deg) scale(1.1); }
+}
+/* bingkai / tulisan pelangi: lebar gambar 300%, jadi geser 150% = tepat satu putaran penuh */
+@keyframes holo-pan { to { background-position: 150% 0; } }
+@keyframes holo-pop { 0% { transform: scale(.94) rotate(-1.2deg); } 100% { transform: none; } }
+@keyframes holo-twinkle { 0%, 100% { opacity: .08; } 50% { opacity: .4; } }
+@keyframes holo-sheen { 0%, 40% { background-position: 130% 0; } 100% { background-position: -30% 0; } }
+
+/* klik kartu = lewati animasi (animasi yang berulang terus sengaja tidak ikut dipercepat) */
+.gacha-skip .gacha-card,
+.gacha-skip .gacha-inner,
+.gacha-skip .gacha-flash,
+.gacha-skip .gacha-spark,
+.gacha-skip .gacha-charge i,
+.gacha-skip .gacha-rank,
+.gacha-skip .gacha-stars i.on,
+.gacha-skip .gacha-hint,
+.gacha-skip .gacha-close,
+.gacha-skip .fx-ring,
+.gacha-skip .fx-flash,
+.gacha-skip .fx-beam,
+.gacha-skip .fx-floats,
+.gacha-skip .gacha-aura {
+  animation-duration: .01s !important;
+  animation-delay: 0s !important;
+}
+.gacha-skip[data-rate="5"] .gacha-aura,
+.gacha-skip .fx-rays { animation-delay: 0s !important; }
+.gacha-skip[data-rate="5"] .gacha-aura { animation-duration: .01s, 5s !important; }
+.gacha-skip .fx-rays { animation-duration: .01s, 22s !important; }
+.gacha-skip:not([data-rate="5"]) .gacha-stage { animation: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .holo-img { transition: none; }
+  .gacha-card, .gacha-inner, .gacha-aura, .gacha-flash, .gacha-spark, .gacha-close,
+  .gacha-rank, .gacha-stars i, .gacha-hint, .gacha-stage, .gacha-back, .gacha-wrap .gacha-rname,
+  .holo-frame, .holo-frame.holo-pop, .holo-sparkle, .holo-sheen,
+  #dlg[open], #dlg::backdrop { animation: none !important; }
+  .gacha-spark, .gacha-charge, .gacha-fx { display: none; }
+  .gacha-wrap .gacha-front { pointer-events: auto !important; }
+}
+
+/* ---------- banner katalog (kotak yang bisa digeser, isinya dari BANNERS di projects.js) ----------
+   Gambar: lebar 100% = pas selebar kotak, tinggi mengikuti gambar lalu dipotong dari bawah (yang tampil bagian atas).
+   Kalau gambar lebih pendek dari kotak, min-height + object-fit: cover memperbesarnya sampai menutup kotak (tidak ada celah). */
+.banner-track { scrollbar-width: none; overscroll-behavior-x: contain; }
+.banner-track::-webkit-scrollbar { display: none; }
+.banner-img { position: absolute; left: 0; top: 0; width: 100%; height: auto; min-height: 100%; object-fit: cover; }

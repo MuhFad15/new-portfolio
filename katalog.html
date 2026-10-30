@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<!--
+==========================================================================
+ PETUNJUK  |  katalog.html (HALAMAN KATALOG)
+==========================================================================
+ FILE DI FOLDER INI
+   index.html    halaman utama (Home, About, Skill, Project, Experience, Contact)
+   katalog.html  halaman katalog semua project
+   projects.js   DAFTAR PROJECT: ubah / tambah / hapus card, ganti gambar & tulisan card di sini
+   script.js     menu, tema gelap, popup, filter. Biasanya tidak perlu diubah
+                 (di dalamnya juga ada isi About, Skill, Experience, dan EMAIL)
+   src/input.css CSS: tema Tailwind + animasi popup gacha. Setelah diubah jalankan  npm run build
+   dist/         hasil build (output.css). Jangan diedit tangan
+   images/       TARUH SEMUA GAMBARMU DI SINI (foto-profil.jpg + gambar project)
+   CATATAN.md    petunjuk lengkap versi tulisan
+   CONTOH-KODE.txt  kumpulan kode siap salin: tambah card, skill, tag, banner, pengalaman, tipe, rate, warna, dll.
+
+ YANG SERING DIUBAH DARI HALAMAN INI
+   Seluruh card, banner, dan tombol tipe (Website / Design) di halaman ini otomatis dari projects.js, jadi:
+     - ganti gambar card  -> projects.js, isi image: 'images/namafile.jpg'
+     - ganti tulisan card -> projects.js, isi title / label / desc
+     - tambah card        -> projects.js, salin satu blok { ... }
+   Banner di atas juga dari projects.js (bagian BANNERS). Yang ada di file ini hanya kotak ajakan di bawah.
+
+ CARA MEMBUKA : klik dua kali index.html (sudah memakai dist/output.css hasil build, jadi tidak perlu internet kecuali font).
+==========================================================================
+-->
+<html lang="id" class="box-border scroll-smooth pb-[env(safe-area-inset-bottom,0px)] pt-[env(safe-area-inset-top,0px)] scroll-pt-[calc(env(safe-area-inset-top,0px)_+_80px)]">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Katalog Project – Muhammad Fadhli</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Figtree:wght@400;500;600&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="dist/output.css">
+<script>
+try { const t = localStorage.getItem('theme'); if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark'); } catch (e) { if (matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.classList.add('dark'); }
+</script>
+</head>
+<body class="min-h-screen bg-paper font-sans text-ink antialiased dark:bg-night dark:text-frost">
+<div class="fixed inset-x-0 top-0 z-10 h-[env(safe-area-inset-top,0px)] bg-paper dark:bg-night"></div>
+
+<header class="sticky top-[env(safe-area-inset-top,0px)] z-20 border-b border-mist bg-paper/90 backdrop-blur dark:border-edge dark:bg-night/90">
+  <nav class="mx-auto flex max-w-6xl items-center justify-between px-5 py-3" aria-label="Navigasi utama">
+    <a href="index.html#home" class="flex items-center" aria-label="FHY, ke beranda">
+      <span class="relative grid h-10 w-10 place-items-center rounded-xl bg-pine font-display text-sm font-extrabold text-white dark:bg-aqua dark:text-night">FHY<i class="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-gold dark:bg-sun"></i></span>
+    </a>
+    <ul id="nav" class="hidden items-center gap-6 lg:flex xl:gap-8"></ul>
+    <div class="flex items-center gap-2">
+      <a href="katalog.html" class="relative grid h-10 w-10 place-items-center rounded-full border border-mist text-sage transition hover:text-ink dark:border-edge dark:text-fog dark:hover:text-frost" aria-label="Katalog project">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2" stroke-linecap="round"/></svg>
+        <span id="badge" class="absolute -right-1.5 -top-1.5 hidden h-4 min-w-4 rounded-full bg-gold px-1 text-center text-[10px] font-bold leading-4 text-night dark:bg-sun"></span>
+      </a>
+      <button id="theme" class="grid h-10 w-10 place-items-center rounded-full border border-mist text-sage transition hover:text-ink dark:border-edge dark:text-fog dark:hover:text-frost" aria-label="Ganti tema terang atau gelap">
+        <svg class="h-5 w-5 dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="hidden h-5 w-5 dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+      <button id="burger" class="grid h-10 w-10 place-items-center rounded-full border border-mist text-sage dark:border-edge dark:text-fog lg:hidden" aria-label="Buka menu" aria-expanded="false" aria-controls="mobile">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </nav>
+  <ul id="mobile" class="hidden border-t border-mist px-5 pb-3 dark:border-edge lg:hidden"></ul>
+</header>
+
+<!-- ================= ISI HALAMAN ================= -->
+<div class="bg-ink px-5 py-2 text-center text-xs text-paper dark:bg-frost dark:text-night">Project lain sedang dalam pengerjaan. Simpan yang kamu suka.</div>
+<main class="mx-auto max-w-6xl px-5 pb-16">
+  <p class="pt-6 text-sm text-sage dark:text-fog"><a href="index.html" class="underline-offset-4 hover:underline">Home</a> / Katalog</p>
+  <!-- ===== BANNER KATALOG (kotak persegi panjang, bisa digeser) =====
+     Isinya BUKAN di file ini. Ubah / tambah / hapus banner di projects.js, bagian BANNERS (petunjuknya lengkap di sana).
+     Gambar banner: lebarnya ditekan pas kotak, tingginya hanya bagian atas yang diambil. -->
+  <section id="banner" aria-label="Banner katalog" class="relative mt-4 overflow-hidden rounded-3xl bg-pine text-white dark:bg-[#0A2B31]"></section>
+  <!-- ===== TOMBOL KATEGORI, PENCARIAN, DAN SEMUA CARD PROJECT =====
+     Semua ini dibuat OTOMATIS dari projects.js. Jadi untuk menambah / menghapus / mengganti gambar card,
+     buka projects.js, bukan file ini. -->
+<div id="tiles" class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4"></div>
+  <div class="mt-8 flex flex-wrap items-center gap-3">
+    <input id="q" type="search" placeholder="Cari project" aria-label="Cari project" class="w-full min-w-0 rounded-full border border-mist bg-white px-5 py-2.5 text-sm outline-none focus:border-pine dark:border-edge dark:bg-panel dark:focus:border-aqua sm:w-auto sm:max-w-xs sm:flex-1">
+    <div id="sts" class="flex w-full gap-2 overflow-x-auto pb-1 sm:w-auto [scrollbar-width:none]" role="group" aria-label="Filter status"></div>
+    <select id="sort" aria-label="Urutkan" class="w-full rounded-full border border-mist bg-white px-4 py-2.5 text-sm dark:border-edge dark:bg-panel sm:ml-auto sm:w-auto"><option value="no">Nomor</option><option value="az">Nama A–Z</option></select>
+  </div>
+  <p id="count" class="mb-5 mt-5 text-sm text-sage dark:text-fog"></p>
+  <div id="grid" class="grid grid-cols-2 gap-4 md:grid-cols-3"></div>
+  <div id="empty" class="hidden py-16 text-center"><p class="font-display text-xl font-bold">Tidak ada project yang cocok</p><p class="mt-1 text-sage dark:text-fog">Ubah kata pencarian atau pilih kategori lain.</p><button id="reset" class="mt-4 rounded-full border border-ink px-5 py-2 text-sm font-semibold dark:border-frost">Reset filter</button></div>
+  <section class="mt-14 flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-mist bg-white p-8 dark:border-edge dark:bg-panel"><p class="font-display text-2xl font-bold">Punya ide untuk project berikutnya?</p><a href="index.html#contact" class="rounded-full bg-pine px-7 py-3 text-sm font-semibold text-white dark:bg-aqua dark:text-night">Contact Me</a></section>
+</main>
+
+<!-- Popup detail project (isinya dibuat otomatis oleh script.js). Tidak perlu diubah. -->
+<dialog id="dlg" aria-label="Detail project" class="m-auto max-h-none w-[min(86vw,20rem)] max-w-none overflow-visible bg-transparent p-0 text-ink shadow-none backdrop:bg-black/60 backdrop:backdrop-blur-sm dark:text-frost"><div id="dlgBody"></div></dialog>
+
+<footer class="border-t border-mist dark:border-edge"><div class="mx-auto max-w-6xl px-5 py-8 text-sm text-sage dark:text-fog">© 2026 Muhammad Fadhli</div></footer>
+
+<script src="projects.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
