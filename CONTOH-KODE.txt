@@ -1,0 +1,451 @@
+==========================================================================
+ CONTOH-KODE.txt  |  KUMPULAN KODE SIAP SALIN UNTUK PORTOFOLIO FADHLI
+==========================================================================
+Cara pakai: cari bagian yang kamu mau (Ctrl+F, ketik nomornya, misal "5."),
+salin kodenya, tempel di file yang disebutkan, lalu simpan dan refresh browser.
+
+  DAFTAR ISI
+   1. Menambah CARD PROJECT
+   2. Mengganti gambar / tulisan card
+   3. Menghapus card, mengurutkan card
+   4. RATE card (animasi popup 1 sampai 5)
+   5. TIPE katalog (Website / Design / tipe baru)
+   6. BANNER katalog (gambar, tulisan, link, kecepatan geser)
+   7. SKILL (tambah, hapus, ubah persen)
+   8. TAG skill (tambah, ganti teks, hapus)
+   9. EXPERIENCE (pengalaman)
+  10. ABOUT (tabel Nama / Tinggal / dst)
+  11. MENU navigasi
+  12. EMAIL dan KONTAK
+  13. FOTO PROFIL di Home dan teks perkenalan
+  14. WARNA dan FONT
+  15. ANIMASI popup (durasi, putaran, warna), gyroscope
+  16. BUILD, UPLOAD, dan DEPLOY (Vercel)
+  17. ERROR yang sering muncul dan cara memperbaikinya
+
+ATURAN PENULISAN (berlaku untuk semua)
+  - Satu data = satu blok.  Blok card / banner pakai kurawal  { ... }
+    Blok skill / experience / about pakai kurung siku  [ ... ]
+  - Antar blok dipisah koma  ,
+  - Semua teks diapit tanda kutip  ' '
+  - Angka (rate, persen) TANPA tanda kutip
+  - Teks yang ada tanda kutip tunggal: tulis  \'  contoh  'Fadhli\'s project'
+  - Tanda // di kode = catatan, tidak ikut dijalankan. Boleh dihapus.
+
+
+==========================================================================
+ 1. MENAMBAH CARD PROJECT                          FILE: projects.js
+==========================================================================
+Cari tulisan:  const PROJECTS = [
+Tempel blok baru di bawah blok terakhir. Pastikan blok SEBELUMNYA berakhir
+dengan koma  },
+
+--- Card "Coming Soon" (belum jadi) ---
+  {
+    id: '007',                      // nomor unik, tidak boleh sama dengan card lain
+    rate: 3,                        // 1 sampai 5 (lihat bagian 4)
+    title: 'Judul Project',
+    category: 'Website',            // 'Website' atau 'Design' (lihat bagian 5)
+    ready: false,                   // false = Coming Soon
+    image: 'images/judul.jpg',      // gambar card ('' = tanpa gambar)
+    imagePos: 'center',             // bagian gambar yang diambil kalau terpotong
+    label: '',                      // tulisan kalau belum ada gambar ('' = otomatis)
+    desc: 'Penjelasan singkat project ini.',
+    tools: 'HTML, Tailwind CSS'
+  },
+
+--- Card "Tersedia" (sudah jadi, ada tombol buka) ---
+  {
+    id: '008',
+    rate: 5,
+    title: 'Project Selesai',
+    category: 'Website',
+    ready: true,                    // true = Tersedia
+    image: 'images/selesai.jpg',
+    imagePos: 'top',
+    label: '',
+    link: 'https://github.com/username/nama-repo',   // alamat tujuan tombol
+    linkText: 'Buka project',                          // tulisan tombol
+    desc: 'Penjelasan singkat project ini.',
+    tools: 'HTML, Tailwind CSS, JavaScript'
+  },
+
+Catatan: 4 project PERTAMA juga tampil di bagian "Project" di Home.
+Card baru otomatis muncul di katalog, bisa dicari, difilter, dan disimpan.
+
+
+==========================================================================
+ 2. MENGGANTI GAMBAR / TULISAN CARD                FILE: projects.js
+==========================================================================
+Langkah gambar:
+  1) Taruh gambar di folder images/  (contoh  toko.jpg)
+     Nama tanpa spasi, pakai strip:  toko-online.jpg
+  2) Di blok project-nya isi   image: 'images/toko.jpg',
+  3) Simpan, refresh.
+Nama file harus PERSIS sama (huruf besar/kecil dan ekstensi .jpg/.png/.webp).
+
+Bagian gambar terpotong? ganti imagePos dengan salah satu:
+  imagePos: 'top',        imagePos: 'bottom',      imagePos: 'left',
+  imagePos: 'right',      imagePos: 'center',      imagePos: 'left top',
+  imagePos: '30% 20%',    // bebas, kiri-kanan dan atas-bawah dalam persen
+
+Mengganti tulisan di card yang belum ada gambar:
+  label: 'Segera Rilis',          // kosong ('') = FHY (Tersedia) / Coming Soon
+
+Mengganti deskripsi dan tools:
+  desc: 'Kalimat baru.',
+  tools: 'HTML, CSS, JavaScript'
+
+
+==========================================================================
+ 3. MENGHAPUS CARD, MENGURUTKAN CARD               FILE: projects.js
+==========================================================================
+MENGHAPUS : hapus satu blok { ... } utuh sampai koma di ujungnya.
+MENGURUTKAN: pindahkan blok ke atas / bawah. Urutan di daftar = urutan di
+             halaman. Kolom "Nomor" di katalog mengurutkan berdasarkan ini.
+MENYEMBUNYIKAN SEMENTARA: ubah baris pembuka dan penutup jadi komentar, atau
+             cukup hapus. (Tidak ada mode "sembunyikan" bawaan.)
+
+
+==========================================================================
+ 4. RATE CARD (ANIMASI POPUP 0 SAMPAI 5)           FILE: projects.js
+==========================================================================
+Di blok project, baris:   rate: 4,
+  rate: 0,   // SECRET : paling gila. Tampak 5 bintang -> glitch -> ERROR -> WARNING -> flash putih -> kartu berputar banyak sambil glitch, mengecil (menyerap) lalu membesar -> terbuka.
+             //          Setelah itu tiap 5 detik glitch: gambar jadi tulisan ERROR sebentar (src/input.css, cari sec-imgerr).
+             //          Bintang diganti "?" dan tulisan "Secret". Banyak lapisan efek di sekitar kartu.
+  rate: 1,   // 1 Star : membalik sekali, sederhana
+  rate: 2,   // 2 Star : berputar 2x, percikan kecil
+  rate: 3,   // 3 Star : berputar 3x, kilatan + percikan
+  rate: 4,   // 4 Star : berputar 4x, gelombang kejut, layar bergetar
+  rate: 5,   // 5 Star : animasi KHUSUS + kartu holografik.
+             //          Setelah terbuka, ketuk kartu = gambar keluar dari kartu
+             //          (lompat keluar, lalu ke samping, lalu kembali) + ganti warna bingkai
+Rate dihapus / salah isi = otomatis 3. (rate: 0 sengaja berarti Secret.)
+Urutan / waktu fase Secret:  script.js, cari  const PHASES   (angka = milidetik)
+Tulisan jendela error:       script.js, cari  const ERR_LINES
+
+Mengganti NAMA rate ("1 Star", "5 Star", dst)       FILE: script.js
+Cari tulisan:  const RATES
+  const RATES = {
+    1: { name: '1 Star', sparks: 0  },
+    5: { name: '5 Star', sparks: 10 }     // sparks = jumlah percikan
+  };
+
+
+==========================================================================
+ 5. TIPE KATALOG (Website / Design / tipe baru)    FILE: projects.js
+==========================================================================
+Cari tulisan:  const CATEGORIES
+  const CATEGORIES = ['Website', 'Design'];
+
+Menambah tipe baru "Aplikasi":
+  const CATEGORIES = ['Website', 'Design', 'Aplikasi'];
+lalu di project yang memakainya:
+  category: 'Aplikasi',
+
+Mengganti nama tipe (misal Design -> Desain):
+  1) const CATEGORIES = ['Website', 'Desain'];
+  2) di SEMUA project yang tadinya 'Design' ubah jadi  category: 'Desain',
+Huruf besar/kecil harus sama persis. Urutan di daftar = urutan tombol.
+Tombol dengan jumlah 0 item tetap tampil.
+
+
+==========================================================================
+ 6. BANNER KATALOG                                 FILE: projects.js
+==========================================================================
+Cari tulisan:  const BANNERS = [
+Tempel blok baru di bawah blok terakhir (jangan lupa koma).
+
+--- Banner GAMBAR polos (bisa diklik) ---
+  {
+    image: 'images/promo.jpg',
+    imagePos: 'top',                // 'top' (bawaan), 'center', atau 'bottom'
+    link: 'index.html#project',
+    linkText: ''
+  },
+
+--- Banner GAMBAR dengan tulisan di pojok kiri bawah ---
+  {
+    image: 'images/promo.jpg',
+    title: 'Judul Banner',
+    desc: 'Kalimat singkat di bawah judul.',
+    link: 'https://github.com/username',
+    linkText: 'Kunjungi GitHub'     // tombol, tampil kalau link dan linkText diisi
+  },
+
+--- Banner TULISAN (kotak hijau + huruf FHY) ---
+  {
+    image: '',
+    label: 'Koleksi 2026',
+    title: 'Judul Besar',
+    desc: 'Kalimat penjelasan.',
+    link: 'index.html',
+    linkText: 'Lihat portofolio',
+    tagSmall: 'No. 001',            // kotak putih kecil di kanan bawah (layar lebar)
+    tag: 'Portofolio Pribadi'       // kosongkan keduanya ('') untuk menghilangkan kotak
+  },
+
+Cara gambar banner ditampilkan:
+  - LEBAR gambar ditekan pas selebar kotak, lalu TINGGI hanya diambil bagian ATAS.
+    Jadi taruh bagian terpenting gambar di atas.
+  - Disarankan landscape lebar, misal 1600 x 700 piksel. Ukuran bebas.
+  - Gambar yang lebih pendek dari kotak otomatis diperbesar sampai menutup kotak.
+  - File tidak ditemukan = kotak hijau polos (tidak rusak).
+
+MENGHAPUS banner: hapus satu blok { ... } sampai komanya.
+HANYA 1 banner = tidak bisa digeser, panah dan titik hilang.
+
+Kecepatan geser otomatis (milidetik):
+  const BANNER_AUTOPLAY = 5500;     // 5,5 detik. 3000 = 3 detik. 0 = mati
+
+
+==========================================================================
+ 7. SKILL                                          FILE: script.js
+==========================================================================
+Cari tulisan:  const skills
+Format satu skill:   ['Nama', 'Keterangan', angka 0-100, 'Tag opsional']
+
+  const skills = [
+    ['HTML', 'Menyusun struktur halaman.', 85],
+    ['CSS', 'Mengatur tampilan dan tata letak.', 80],
+    ['Tailwind', 'Sedang dipelajari.', 55, 'Belajar'],
+    ['Great Idea', 'Selalu ada ide baru untuk dibuat.', 90]
+  ];
+
+MENAMBAH skill (tempel satu baris di dalam daftar, jangan lupa koma):
+    ['JavaScript', 'Membuat halaman jadi interaktif.', 40, 'Belajar'],
+    ['Figma', 'Membuat desain tampilan.', 60],
+    ['Git', 'Menyimpan dan mengelola versi kode.', 35, 'Baru'],
+
+MENGUBAH persen bar:  ganti angka ke-3.   ['HTML', '...', 90],
+MENGHAPUS skill: hapus satu baris [ ... ] sampai komanya.
+Angka TANPA tanda kutip. 0 = bar kosong, 100 = penuh.
+
+
+==========================================================================
+ 8. TAG SKILL (label kuning kecil seperti "Belajar")   FILE: script.js
+==========================================================================
+Tag = bagian KE-4 di baris skill. Tidak diisi = tidak ada tag.
+
+TAMBAH tag ke skill yang belum punya:
+    ['CSS', 'Mengatur tampilan dan tata letak.', 80],           <- sebelum
+    ['CSS', 'Mengatur tampilan dan tata letak.', 80, 'Mahir'],  <- sesudah
+
+GANTI teks tag:
+    ['Tailwind', 'Sedang dipelajari.', 55, 'Belajar'],   ->   ... 55, 'Hampir bisa'],
+
+HAPUS tag:
+    ['Tailwind', 'Sedang dipelajari.', 55, 'Belajar'],   ->   ['Tailwind', 'Sedang dipelajari.', 55],
+    (atau isi dengan tanda kutip kosong:  55, ''],  )
+
+Teks tag bebas, contoh: 'Belajar', 'Baru', 'Mahir', 'Favorit', 'Sedang dalam proses'.
+Tag mengikuti warna emas situs. Ubah warnanya: cari tulisan "const tagOf" di script.js,
+class bg-gold (terang) dan dark:bg-sun (mode gelap).
+
+
+==========================================================================
+ 9. EXPERIENCE (PENGALAMAN)                        FILE: script.js
+==========================================================================
+Cari tulisan:  const exp
+Format satu baris:   ['Waktu', 'Judul', 'Keterangan']
+
+  const exp = [
+    ['Sekarang', 'Siswa SMA Plus Abu Dzar', 'Belajar di sekolah sambil mengembangkan kemampuan web.'],
+    ['Sekarang', 'Belajar Tailwind CSS', 'Membuat tampilan website langsung dengan class utility.'],
+    ['Sebelumnya', 'Belajar HTML dan CSS', 'Dasar membuat halaman website.']
+  ];
+
+MENAMBAH (tempel di dalam daftar):
+    ['2026', 'Membuat portofolio sendiri', 'Dibuat dengan HTML, Tailwind CSS, dan JavaScript.'],
+    ['2025 - 2026', 'Belajar JavaScript', 'Membuat halaman yang bisa bereaksi.'],
+
+Kolom "Waktu" bebas isi: 'Sekarang', '2026', 'Jan 2026', '2024 - 2025'.
+MENGHAPUS: hapus satu baris [ ... ] sampai komanya.
+
+
+==========================================================================
+10. ABOUT (TABEL NAMA / TINGGAL / KELUARGA / CITA-CITA)   FILE: script.js
+==========================================================================
+Cari tulisan:  const about
+Format satu baris:   ['Judul kiri', 'Isi kanan']
+
+  const about = [
+    ['Nama', 'Muhammad Fadhli'],
+    ['Tinggal', 'Regensi 2, Kec. Cibitung, Kab. Bekasi'],
+    ['Keluarga', 'Tinggal bersama orang tua, dan merasa bahagia'],
+    ['Cita-cita', 'Menjadi developer, entah game maupun web']
+  ];
+
+MENAMBAH:
+    ['Hobi', 'Ngoding, desain, dan main game'],
+    ['Sekolah', 'SMA Plus Abu Dzar'],
+
+Judul besar "SAYA MUHAMMAD FADHLI" ada di index.html, cari tulisan  SAYA<br>MUHAMMAD.
+Pakai <br> untuk pindah baris:   SAYA<br>MUHAMMAD<br>FADHLI
+
+
+==========================================================================
+11. MENU NAVIGASI                                 FILE: script.js
+==========================================================================
+Cari tulisan:  const menu
+  const menu = ['HOME','ABOUT','SKILL','PROJECT','EXPERIENCE','CONTACT'];
+Setiap kata harus cocok dengan id section di index.html
+(HOME = id="home", ABOUT = id="about", dst, huruf kecil di HTML).
+Menyembunyikan satu menu: hapus katanya dari daftar.
+Menambah menu baru: tambah katanya, lalu beri id yang sama pada <section> baru.
+
+
+==========================================================================
+12. EMAIL DAN KONTAK
+==========================================================================
+a) FILE script.js, baris paling atas:
+     const EMAIL = 'emailkamu@gmail.com';       // tujuan form "Kirim pesan"
+
+b) FILE index.html, cari tulisan  email@kamu.com  (bagian Contact):
+     <li><a class="underline-offset-4 hover:underline" href="mailto:emailkamu@gmail.com">emailkamu@gmail.com</a></li>
+     <li><a class="underline-offset-4 hover:underline" href="https://github.com/usernamekamu" target="_blank" rel="noopener">github.com/usernamekamu</a></li>
+
+   Menambah kontak lain (Instagram, dll), tempel satu baris <li> di bawahnya:
+     <li><a class="underline-offset-4 hover:underline" href="https://instagram.com/usernamekamu" target="_blank" rel="noopener">instagram.com/usernamekamu</a></li>
+
+
+==========================================================================
+13. FOTO PROFIL DI HOME DAN TEKS PERKENALAN       FILE: index.html
+==========================================================================
+FOTO (muncul di sisi belakang kartu saat di-hover / diketuk):
+  1) Taruh fotomu di folder images/ dengan nama  foto-profil.jpg
+  2) Selesai. Foto .png / .webp? ubah ekstensi di  src="images/foto-profil.jpg"
+  Wajah terpotong? di baris <img> ganti  object-center  dengan:
+     object-top | object-bottom | object-left | object-right | object-left-top | object-right-top
+  Mau foto tampil utuh? ganti  object-cover  jadi  object-contain
+  Jarak foto ke tepi kartu: cari  p-3  pada div sisi belakang (p-2 tipis, p-4 lebar).
+
+TEKS PERKENALAN: cari tulisan  Hello, I’m  di index.html
+  - Nama besar:        Muhammad<br>Fadhli
+  - Baris hijau:       Student in Abu Dzar
+  - Kalimat:           Saya seorang siswa SMA Plus Abu Dzar. ...
+  - Tulisan di kartu depan: cari  Muhammad Fadhli  dan  SMA Plus Abu Dzar  dan  Web Developer
+
+
+==========================================================================
+14. WARNA DAN FONT                                FILE: src/input.css
+==========================================================================
+Cari tulisan:  @theme
+  --color-pine: #0E6B70;      // hijau tua (tombol, kotak hijau)
+  --color-aqua: #3EBEB4;      // tosca (mode gelap)
+  --color-gold: #C99A2E;      // emas (garis, tag)
+  --color-sun:  #E2B74A;      // emas terang
+  --color-paper:#F4F9F7;      // latar mode terang
+  --color-night:#07161A;      // latar mode gelap
+Ganti kode warnanya, lalu jalankan  npm run build  (bagian 16).
+Dipakai di HTML sebagai class:  bg-pine  text-gold  border-aqua  dst.
+
+Font:
+  --font-display: "Bricolage Grotesque", system-ui, sans-serif;   // judul
+  --font-sans: Figtree, system-ui, sans-serif;                    // isi
+Mengganti font = ganti nama di sini DAN ganti link Google Fonts di <head>
+index.html dan katalog.html.
+
+
+==========================================================================
+15. ANIMASI POPUP DAN GYROSCOPE
+==========================================================================
+a) TABEL RATE                                     FILE: src/input.css
+   Cari tulisan:  TABEL RATE   (satu baris per rate)
+     .gacha-wrap[data-rate="5"] { --glow: 255, 95, 160; --dur: 3.6s; --turns: 6; --flash: 1; --ff: .55; --qa: .7; }
+       --dur    lama animasi (detik)           --turns  jumlah putaran (bulat, min 1)
+       --glow   warna cahaya R, G, B           --flash  kilatan di kartu (0 sampai 1)
+       --ff     kilatan layar penuh (rate 4-5) --qa     getaran layar (0 = diam)
+   Setelah mengubah src/input.css jalankan  npm run build.
+
+b) GYROSCOPE / GERAK KARTU                        FILE: script.js
+   Cari tulisan:  const gyroMax
+     [16, 10, 10, 10, 10, 13] = kemiringan maksimal HP untuk rate 0,1,2,3,4,5.
+     [11, 7, 7, 7, 7, 10]     = untuk laptop. Makin besar makin miring (HP sengaja lebih besar).
+   Cari tulisan:  const LIM = 30;
+     Derajat miring HP untuk mencapai kemiringan maksimal.
+     Makin KECIL = makin peka (HP tidak perlu dimiringkan jauh). Makin besar = lebih kalem.
+   Cari tulisan:  * .07
+     Kehalusan gerak (0.03 sangat lambat, 0.15 cepat).
+
+c) KARTU rate 5 (tema warna bingkai)              FILE: src/input.css
+   Cari tulisan:  TEMA KARTU rate 5
+     .holo-frame[data-skin="1"] { --holo: linear-gradient(...); --hglow: rgba(...); }
+   Ada 4 tema (0 pelangi, 1 emas, 2 tosca, 3 ungu). Ubah warna di sini.
+
+
+==========================================================================
+16. BUILD, UPLOAD, DAN DEPLOY
+==========================================================================
+Perlu Node.js terpasang. Di folder proyek (yang ada package.json):
+
+  npm install          # sekali saja, mengunduh Tailwind CLI
+  npm run dev          # build otomatis tiap kali file disimpan (saat mengedit)
+  npm run build        # build final (jalankan sebelum upload)
+
+Kapan perlu build?
+  - PERLU   : menambah class Tailwind baru di HTML/JS, atau mengubah src/input.css
+  - TIDAK   : hanya mengubah teks, gambar, rate, skill, banner, dll. di projects.js / script.js
+
+UPLOAD ke GitHub: semua isi folder, KECUALI node_modules/ (sudah di .gitignore).
+Folder dist/ dan images/ HARUS ikut.
+
+DEPLOY di Vercel: buat file  vercel.json  di root (sudah ada di folder ini):
+  {
+    "buildCommand": "npm run build",
+    "outputDirectory": "."
+  }
+Atau di Project Settings > Build & Development Settings:
+  Framework Preset = Other, Build Command = npm run build, Output Directory = .
+Peringatan "npm warn install-scripts @parcel/watcher" dan "cache-dir" tidak
+berbahaya, abaikan saja.
+
+
+==========================================================================
+17. ERROR YANG SERING MUNCUL
+==========================================================================
+- Halaman kosong / daftar tidak muncul setelah mengedit
+    -> koma atau tanda kutip kurang di baris yang baru diubah.
+       Tekan F12 > Console, lihat nomor baris yang disebut error.
+- Gambar card tidak muncul
+    -> nama file tidak persis sama (besar/kecil huruf, .jpg vs .png, spasi),
+       atau file belum ada di folder images/.
+- Class Tailwind baru tidak berefek
+    -> jalankan  npm run build  (bagian 16).
+- Skill muncul tanpa tag padahal sudah ditulis
+    -> tag harus bagian KE-4:  ['Nama', 'Keterangan', 55, 'Belajar']  (angka tanpa kutip).
+- Tipe katalog tidak muncul di tombol / card tidak ikut terfilter
+    -> category di project harus sama persis dengan nama di CATEGORIES.
+- Popup tidak bergerak mengikuti HP
+    -> gyroscope butuh HTTPS (Vercel / GitHub Pages sudah HTTPS). Di iPhone,
+       izinkan "Gerakan & Orientasi" saat Safari bertanya.
+- Vercel: "No Output Directory named public"
+    -> pakai vercel.json di bagian 16.
+
+
+==========================================================================
+ HERO (BAGIAN HOME)
+==========================================================================
+a) Kata yang diketik bergantian                   FILE: script.js
+   Cari tulisan:  const HERO_WORDS
+     const HERO_WORDS = ['Student in Abu Dzar', 'Web Developer', 'Future Game Developer'];
+   Tambah kata baru = tambah di dalam [ ], pakai tanda kutip dan koma.
+
+b) Jendela kode kecil                             FILE: index.html
+   Cari tulisan:  hero-code
+   Isi <pre> bebas diubah. Warna kata: k = kata kunci, v = nama variabel, p = properti, s = teks.
+     <span class="p">role</span>: <span class="s">"Web Developer"</span>,
+
+c) Chip yang mengorbit kartu                      FILE: index.html
+   Cari tulisan:  hero-chip
+     <b class="hero-chip" style="--a:0deg"><span>HTML</span></b>
+   --a = posisi sudut awal (0 sampai 360deg). Tambahkan class gold untuk warna emas.
+
+d) Pita berjalan                                  FILE: index.html
+   Cari tulisan:  hero-marquee
+   Tiap pita berisi dua grup kata yang SAMA (supaya gerakannya menyambung). Ubah kata di keduanya.
+
+e) Warna / kecepatan                              FILE: src/input.css
+   Cari tulisan:  HERO
+   Setelah mengubah src/input.css jalankan  npm run build.
