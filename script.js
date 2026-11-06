@@ -31,25 +31,25 @@ const home = (onCatalog || onAbout) ? 'index.html' : '';   // awalan link menu: 
 
 /* Navigasi */
 /* Menu atas. Tulisan harus sama dengan id section di index.html (HOME = id="home", dst). Hapus satu kata = menu itu hilang. */
-/* NAV = tab pembatas map. Di index.html: tab bagian (A-E) lalu link halaman lain. Di halaman lain: tab INDEX (kembali ke sampul) lalu halaman-halaman.
-   Bagian index : ['huruf', 'TULISAN', 'id section di index.html']   Hapus satu baris = tab itu hilang.
-   Halaman      : ['TULISAN', 'file.html']                           Urutan di sini = urutan tab. */
-const idxMenu = [['A', 'PROFIL', 'about'], ['B', 'KEMAMPUAN', 'skill'], ['C', 'PROJECT', 'project'], ['D', 'PENGALAMAN', 'experience'], ['E', 'KONTAK', 'contact']];
+/* NAV UTAMA = sama di SEMUA halaman: ['TULISAN', 'file.html'], urutan di sini = urutan tab.
+   NAV BAGIAN (#subnav) = baris kedua KHUSUS index.html, untuk loncat antar bagian halaman:
+   ['huruf', 'TULISAN', 'id section di index.html']. Hapus satu baris = tab itu hilang. */
+const idxMenu = [['A', 'TENTANG', 'about'], ['B', 'KEMAMPUAN', 'skill'], ['C', 'PROJECT', 'project'], ['D', 'PENGALAMAN', 'experience'], ['E', 'KONTAK', 'contact']];
 const pages = [['INDEX', 'index.html'], ['PROFIL', 'tentang.html'], ['DATA DIRI', 'data-diri.html'], ['KATALOG', 'katalog.html']];
-const onIndex = !onCatalog && !onAbout, cur = location.pathname.split('/').pop() || 'index.html';
-const tab = (t, h, k, on) => `<li><a href="${h}" class="nv" ${on ? 'data-active="true" ' : ''}>${k ? `<b>${k}</b>` : ''}${t}</a></li>`;
-const pageTabs = pages.filter(([, h]) => !(onIndex && h === 'index.html')).map(([t, h]) => tab(t, h, '', h === cur)).join('');
-$('#nav').innerHTML = (onIndex ? idxMenu.map(([k, t, id]) => tab(t, '#' + id, k, false)).join('') + '<li class="nv-sep" aria-hidden="true"></li>' : '') + pageTabs;
-$('#mobile').innerHTML = (onIndex ? idxMenu.map(([k, t, id]) => `<li><a href="#${id}" class="block py-3 text-sm font-semibold tracking-wider">${k} / ${t}</a></li>`).join('') : '') + pages.filter(([, h]) => !(onIndex && h === 'index.html')).map(([t, h]) => `<li><a href="${h}" class="block py-3 text-sm font-semibold tracking-wider">${t}</a></li>`).join('');
+const cur = location.pathname.split('/').pop() || 'index.html';
+$('#nav').innerHTML = pages.map(([t, h]) => `<li><a href="${h}" class="nv"${h === cur ? ' data-active="true" aria-current="page"' : ''}>${t}</a></li>`).join('');
+$('#mobile').innerHTML = pages.map(([t, h]) => `<li><a href="${h}" class="block py-3 text-sm font-semibold tracking-wider"${h === cur ? ' aria-current="page"' : ''}>${t}</a></li>`).join('');
 const burger = $('#burger'), mob = $('#mobile');
 burger.onclick = () => { const h = mob.classList.toggle('hidden'); burger.setAttribute('aria-expanded', !h); };
 $$('#mobile a').forEach(a => a.onclick = () => { mob.classList.add('hidden'); burger.setAttribute('aria-expanded', 'false'); });
-const links = $$('#nav a[href^="#"]');
-if (!onCatalog && !onAbout) {
+const subnav = $('#subnavList');
+if (subnav) {
+  subnav.innerHTML = idxMenu.map(([k, t, id]) => `<a href="#${id}"><b>${k}</b>${t}</a>`).join('');
+  const links = $$('#subnavList a');
   const spy = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) links.forEach(l => l.dataset.active = l.getAttribute('href') === '#' + e.target.id); }), { rootMargin: '-45% 0px -50% 0px' });
   $$('main section').forEach(s => spy.observe(s));
 }
-$('#theme').onclick = () => { const d = document.documentElement.classList.toggle('dark'); store.set('theme', d ? 'dark' : 'light'); };
+if ($('#theme')) $('#theme').onclick = () => { const d = document.documentElement.classList.toggle('dark'); store.set('theme', d ? 'dark' : 'light'); };
 
 /* Kartu profil di home: ketuk / Enter untuk membalik (di desktop cukup hover) */
 const flip = $('#flip');
@@ -433,7 +433,7 @@ function render() {
     $('#count').textContent = list.length + ' dari ' + items.length + ' item';
     $('#empty').classList.toggle('hidden', list.length > 0);
   }
-  const b = $('#badge'); b.textContent = saved.size; b.classList.toggle('hidden', !saved.size);
+  const b = $('#badge'); if (b) { b.textContent = saved.size; b.classList.toggle('hidden', !saved.size); }
 }
 if (onCatalog) {
   $('#q').oninput = e => { state.q = e.target.value.trim().toLowerCase(); render(); $('#q').focus(); };

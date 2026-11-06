@@ -17,6 +17,13 @@ npm run build      # build final yang diperkecil (jalankan sebelum upload)
 
 Tailwind memindai `index.html`, `katalog.html`, `script.js`, dan `projects.js`, jadi class yang ditulis di dalam JS (card, popup) ikut dibuat. Mengganti **teks / gambar / rate** project di `projects.js` tidak perlu build. Yang perlu build hanya kalau kamu **menambah class Tailwind baru** atau mengedit `src/input.css`.
 
+
+### Revisi v2: nav, popup, footer
+- **Nav utama** (INDEX, PROFIL, DATA DIRI, KATALOG) sekarang sama di semua halaman. Daftarnya: `const pages` di `script.js`.
+- **Nav bagian** (A Tentang ... E Kontak) dipisah jadi baris kedua `#subnav`, hanya ada di `index.html`. Daftarnya: `const idxMenu` di `script.js`.
+- **Popup card**: tab "No. 001" sekarang menempel di map (aturan `#dlg article.fcard .fd-tab` di `src/input.css`).
+- CSS revisi ada di bagian paling bawah `src/input.css` ("REVISI v2") dan sudah ikut ditambahkan ke `dist/output.css`. Jalankan `npm run build` sekali di komputermu supaya `dist/` dibuat ulang rapi (hasilnya sama).
+
 ## Isi folder
 
 | File / folder | Fungsinya |
